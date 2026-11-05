@@ -83,21 +83,29 @@
       const unlockEvents = ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click', 'keydown'];
       const unlockHandler = () => {
         this.unlockAudio();
+        if (this.isUnlocked) {
+          unlockEvents.forEach(evt => window.removeEventListener(evt, unlockHandler, { capture: true }));
+        }
       };
       unlockEvents.forEach(evt => window.addEventListener(evt, unlockHandler, { capture: true, passive: true }));
     }
 
     unlockAudio() {
-      // 1. Play HTML5 silent audio element to force iOS into 'playback' session (bypasses hardware mute switch)
+      if (this.isUnlocked) {
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+        return;
+      }
+
+      // 1. Play HTML5 silent audio element ONCE to force iOS into 'playback' session
       if (!this.silentAudio) {
         try {
           this.silentAudio = new Audio(SILENT_WAV_URI);
           this.silentAudio.setAttribute('playsinline', '');
           this.silentAudio.setAttribute('webkit-playsinline', '');
+          this.silentAudio.play().catch(() => {});
         } catch (e) {}
-      }
-      if (this.silentAudio) {
-        this.silentAudio.play().catch(() => {});
       }
 
       // 2. Instantiate or resume Web Audio Context
@@ -112,16 +120,14 @@
         if (this.ctx.state === 'suspended') {
           this.ctx.resume().catch(() => {});
         }
-        if (!this.isUnlocked) {
-          try {
-            const buffer = this.ctx.createBuffer(1, 1, 22050);
-            const source = this.ctx.createBufferSource();
-            source.buffer = buffer;
-            source.connect(this.ctx.destination);
-            source.start(0);
-            this.isUnlocked = true;
-          } catch (e) {}
-        }
+        try {
+          const buffer = this.ctx.createBuffer(1, 1, 22050);
+          const source = this.ctx.createBufferSource();
+          source.buffer = buffer;
+          source.connect(this.ctx.destination);
+          source.start(0);
+          this.isUnlocked = true;
+        } catch (e) {}
       }
     }
 
@@ -131,7 +137,9 @@
 
     playSound(generatorFn) {
       if (this.isMuted) return;
-      this.unlockAudio();
+      if (!this.ctx) {
+        this.unlockAudio();
+      }
       if (!this.ctx) return;
 
       if (this.ctx.state === 'suspended') {
@@ -585,7 +593,11 @@
 
     // --- Drag and Drop Handling ---
     onPointerDownPiece(e, piece, slotIndex, pieceEl) {
-      if (this.isGameOver || this.activeDrag) return;
+      if (this.isGameOver) return;
+      // Auto-recover if a previous drag was somehow orphaned
+      if (this.activeDrag) {
+        this.finishDrag();
+      }
       e.preventDefault();
 
       this.sound.init();
@@ -633,6 +645,11 @@
       // Hide tray piece while dragging
       pieceEl.style.visibility = 'hidden';
 
+      // Capture pointer so dragging is not interrupted by edge swipes or gestures
+      try {
+        pieceEl.setPointerCapture(e.pointerId);
+      } catch (err) {}
+
       this.activeDrag = {
         piece,
         slotIndex,
@@ -650,22 +667,37 @@
 
       this.updateDragPosition(e.clientX, e.clientY);
 
+      const cleanUpListeners = () => {
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointercancel', onPointerCancel);
+        try {
+          if (pieceEl.hasPointerCapture(e.pointerId)) {
+            pieceEl.releasePointerCapture(e.pointerId);
+          }
+        } catch (err) {}
+      };
+
       const onPointerMove = (moveEvent) => {
-        if (!this.activeDrag || moveEvent.pointerId !== this.activeDrag.pointerId) return;
+        if (!this.activeDrag) return;
         this.updateDragPosition(moveEvent.clientX, moveEvent.clientY);
       };
 
-      const onPointerUp = (upEvent) => {
-        if (!this.activeDrag || upEvent.pointerId !== this.activeDrag.pointerId) return;
-        window.removeEventListener('pointermove', onPointerMove);
-        window.removeEventListener('pointerup', onPointerUp);
-        window.removeEventListener('pointercancel', onPointerUp);
+      const onPointerUp = () => {
+        if (!this.activeDrag) return;
+        cleanUpListeners();
         this.finishDrag();
       };
 
-      window.addEventListener('pointermove', onPointerMove);
+      const onPointerCancel = () => {
+        if (!this.activeDrag) return;
+        cleanUpListeners();
+        this.finishDrag();
+      };
+
+      window.addEventListener('pointermove', onPointerMove, { passive: true });
       window.addEventListener('pointerup', onPointerUp);
-      window.addEventListener('pointercancel', onPointerUp);
+      window.addEventListener('pointercancel', onPointerCancel);
     }
 
     updateDragPosition(clientX, clientY) {
@@ -781,28 +813,41 @@
       const drag = this.activeDrag;
       if (!drag) return;
 
-      this.clearPlacementPreview();
-      drag.proxy.remove();
-
-      if (drag.validTarget) {
-        // Successful placement
-        this.placePiece(drag.piece, drag.validTarget.row, drag.validTarget.col);
-        this.trayPieces[drag.slotIndex] = null;
-        drag.pieceEl.remove();
-
-        // Check if all 3 tray pieces have been placed
-        const remaining = this.trayPieces.filter(p => p !== null);
-        if (remaining.length === 0) {
-          this.refillTray();
-        } else {
-          this.checkGameOver();
+      try {
+        this.clearPlacementPreview();
+        if (drag.proxy && drag.proxy.parentNode) {
+          drag.proxy.remove();
         }
-      } else {
-        // Snaps back
-        drag.pieceEl.style.visibility = 'visible';
-      }
 
-      this.activeDrag = null;
+        if (drag.validTarget) {
+          // Successful placement
+          this.placePiece(drag.piece, drag.validTarget.row, drag.validTarget.col);
+          this.trayPieces[drag.slotIndex] = null;
+          if (drag.pieceEl && drag.pieceEl.parentNode) {
+            drag.pieceEl.remove();
+          }
+
+          // Check if all 3 tray pieces have been placed
+          const remaining = this.trayPieces.filter(p => p !== null);
+          if (remaining.length === 0) {
+            this.refillTray();
+          } else {
+            this.checkGameOver();
+          }
+        } else {
+          // Snaps back
+          if (drag.pieceEl) {
+            drag.pieceEl.style.visibility = 'visible';
+          }
+        }
+      } catch (err) {
+        console.error('Error during finishDrag:', err);
+        if (drag && drag.pieceEl) {
+          drag.pieceEl.style.visibility = 'visible';
+        }
+      } finally {
+        this.activeDrag = null;
+      }
     }
 
     canPlacePiece(matrix, startR, startC) {

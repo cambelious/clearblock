@@ -24,7 +24,7 @@ Blockfall is an 8×8 block placement web game built with vanilla HTML5, CSS3, an
 - **FR-1.3:** At game start or restart, all 64 cells shall be set to `EMPTY`.
 
 ### FR-2: Shape Pool & Spawning
-- **FR-2.1:** The shape pool shall consist of exactly 13 fixed discrete pieces:
+- **FR-2.1:** The shape pool shall consist of exactly 16 fixed discrete pieces:
   1. **Dot 1×1:** 1 cell (`[[1]]`)
   2. **Square 2×2:** 4 cells (`[[1,1],[1,1]]`)
   3. **Square 3×3:** 9 cells (`[[1,1,1],[1,1,1],[1,1,1]]`)
@@ -32,19 +32,23 @@ Blockfall is an 8×8 block placement web game built with vanilla HTML5, CSS3, an
   5. **Vertical Line 4×1:** 4 cells (`[[1],[1],[1],[1]]`)
   6. **Rectangle 2×3:** 6 cells (`[[1,1,1],[1,1,1]]`)
   7. **Rectangle 3×2:** 6 cells (`[[1,1],[1,1],[1,1]]`)
-  8. **Horizontal T-Shape:** 4 cells (`[[1,1,1],[0,1,0]]`)
-  9. **Horizontal Z-Shape:** 4 cells (`[[1,1,0],[0,1,1]]`)
-  10. **L-Shape Top-Left:** 5 cells (`[[1,1,1],[1,0,0],[1,0,0]]`)
-  11. **L-Shape Top-Right:** 5 cells (`[[1,1,1],[0,0,1],[0,0,1]]`)
-  12. **L-Shape Bottom-Left:** 5 cells (`[[1,0,0],[1,0,0],[1,1,1]]`)
-  13. **L-Shape Bottom-Right:** 5 cells (`[[0,0,1],[0,0,1],[1,1,1]]`)
+  8. **T-Shape Down:** 4 cells (`[[1,1,1],[0,1,0]]`)
+  9. **T-Shape Up:** 4 cells (`[[0,1,0],[1,1,1]]`)
+  10. **T-Shape Left:** 4 cells (`[[0,1],[1,1],[0,1]]`)
+  11. **T-Shape Right:** 4 cells (`[[1,0],[1,1],[1,0]]`)
+  12. **Horizontal Z-Shape:** 4 cells (`[[1,1,0],[0,1,1]]`)
+  13. **L-Shape Top-Left:** 5 cells (`[[1,1,1],[1,0,0],[1,0,0]]`)
+  14. **L-Shape Top-Right:** 5 cells (`[[1,1,1],[0,0,1],[0,0,1]]`)
+  15. **L-Shape Bottom-Left:** 5 cells (`[[1,0,0],[1,0,0],[1,1,1]]`)
+  16. **L-Shape Bottom-Right:** 5 cells (`[[0,0,1],[0,0,1],[1,1,1]]`)
 - **FR-2.2:** Rotation by the player is **prohibited**.
 - **FR-2.3:** The staging tray shall hold exactly 3 piece slots.
-- **FR-2.4 (Rebalanced Shape Weights):** A new set of 3 pieces shall be generated using probability weighting to prevent L-shape over-saturation while maintaining lower frequency for tiny shapes:
+- **FR-2.4 (Rebalanced Shape Weights):** A new set of 3 pieces shall be generated using balanced probability weighting:
   - Small shapes (1–4 cells: 1×1, 2×2, 1×4, 4×1): **Weight 1**
-  - Medium shapes (T-Shape, Z-Shape): **Weight 2**
+  - T-shapes (all 4 orientations): **Weight 1 each** (total weight 4)
+  - L-shapes (all 4 orientations): **Weight 1 each** (total weight 4)
+  - Z-Shape: **Weight 2**
   - Large shapes (Rectangle 2×3, 3×2, Square 3×3): **Weight 3**
-  - L-shapes (each of the 4 L-shape variants): **Weight 1** (reduced from 3 to curb repetitive L-spawns)
 - **FR-2.5:** Each piece shall be assigned a color from the 6 palette options: `coral`, `amber`, `lime`, `sky`, `pink`, `teal` (colors may repeat).
 
 ### FR-3: Drag-and-Drop & Placement

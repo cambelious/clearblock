@@ -22,11 +22,9 @@
     { varName: 'var(--block-6)', rawOklch: 'oklch(0.80 0.14 190)' }  // teal
   ];
 
-  // 13 discrete shape matrices with Rebalanced Spawning Weights:
-  // L-shapes lowered to weight 1 (curbing over-occurrence)
-  // Small blocks (1-4 cells): weight 1
-  // Medium blocks (T, Z): weight 2
-  // Large blocks (Rect 2x3, 3x2, Square 3x3): weight 3
+  // 16 discrete shape matrices:
+  // Includes all 4 orientations of the T-Shape and all 4 orientations of the L-Shape
+  // Rebalanced weights: small shapes = 1, T-shapes = 1 each (total 4), L-shapes = 1 each (total 4), Z = 2, large rectangles/squares = 3
   const SHAPE_DEFINITIONS = [
     // 1: Dot 1x1 (1 cell - small)
     { name: '1x1', matrix: [[1]], weight: 1 },
@@ -42,17 +40,23 @@
     { name: '2x3', matrix: [[1, 1, 1], [1, 1, 1]], weight: 3 },
     // 7: Rectangle 3x2 (6 cells - large)
     { name: '3x2', matrix: [[1, 1], [1, 1], [1, 1]], weight: 3 },
-    // 8: Horizontal T-Shape (4 cells - medium)
-    { name: 'T-Shape', matrix: [[1, 1, 1], [0, 1, 0]], weight: 2 },
-    // 9: Horizontal Z-Shape (4 cells - medium)
+    // 8: T-Shape Down (4 cells - stem down)
+    { name: 'T-Down', matrix: [[1, 1, 1], [0, 1, 0]], weight: 1 },
+    // 9: T-Shape Up (4 cells - stem up)
+    { name: 'T-Up', matrix: [[0, 1, 0], [1, 1, 1]], weight: 1 },
+    // 10: T-Shape Left (4 cells - stem left)
+    { name: 'T-Left', matrix: [[0, 1], [1, 1], [0, 1]], weight: 1 },
+    // 11: T-Shape Right (4 cells - stem right)
+    { name: 'T-Right', matrix: [[1, 0], [1, 1], [1, 0]], weight: 1 },
+    // 12: Horizontal Z-Shape (4 cells - medium)
     { name: 'Z-Shape', matrix: [[1, 1, 0], [0, 1, 1]], weight: 2 },
-    // 10: L-Shape Top-Left (5 cells - lowered to weight 1)
+    // 13: L-Shape Top-Left (5 cells)
     { name: 'L-TL', matrix: [[1, 1, 1], [1, 0, 0], [1, 0, 0]], weight: 1 },
-    // 11: L-Shape Top-Right (5 cells - lowered to weight 1)
+    // 14: L-Shape Top-Right (5 cells)
     { name: 'L-TR', matrix: [[1, 1, 1], [0, 0, 1], [0, 0, 1]], weight: 1 },
-    // 12: L-Shape Bottom-Left (5 cells - lowered to weight 1)
+    // 15: L-Shape Bottom-Left (5 cells)
     { name: 'L-BL', matrix: [[1, 0, 0], [1, 0, 0], [1, 1, 1]], weight: 1 },
-    // 13: L-Shape Bottom-Right (5 cells - lowered to weight 1)
+    // 16: L-Shape Bottom-Right (5 cells)
     { name: 'L-BR', matrix: [[0, 0, 1], [0, 0, 1], [1, 1, 1]], weight: 1 }
   ];
 

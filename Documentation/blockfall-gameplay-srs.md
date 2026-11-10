@@ -18,7 +18,7 @@ Companion to `blockfall-design-spec.md`.
 ---
 
 ## 3. Piece Definitions
-Pieces cannot be rotated by the player. The pool consists of 16 discrete shapes across a 6-color palette (`coral`, `amber`, `lime`, `sky`, `pink`, `teal`):
+Pieces cannot be rotated by the player. The pool consists of 20 discrete shapes across a 6-color palette (`coral`, `amber`, `lime`, `sky`, `pink`, `teal`):
 
 | ID | Shape Name | Bounding Box | Cell Count | Matrix Representation (1 = filled) | Variants |
 |---|---|:---:|:---:|---|:---:|
@@ -33,22 +33,27 @@ Pieces cannot be rotated by the player. The pool consists of 16 discrete shapes 
 | 9 | **T-Shape Up** | 3×2 | 4 | `[[0,1,0],[1,1,1]]` | 1 |
 | 10 | **T-Shape Left** | 2×3 | 4 | `[[0,1],[1,1],[0,1]]` | 1 |
 | 11 | **T-Shape Right** | 2×3 | 4 | `[[1,0],[1,1],[1,0]]` | 1 |
-| 12 | **Z-Shape** | 3×2 | 4 | `[[1,1,0],[0,1,1]]` | 1 |
-| 13 | **L-Shape TL** | 3×3 | 5 | `[[1,1,1],[1,0,0],[1,0,0]]` | 1 |
-| 14 | **L-Shape TR** | 3×3 | 5 | `[[1,1,1],[0,0,1],[0,0,1]]` | 1 |
-| 15 | **L-Shape BL** | 3×3 | 5 | `[[1,0,0],[1,0,0],[1,1,1]]` | 1 |
-| 16 | **L-Shape BR** | 3×3 | 5 | `[[0,0,1],[0,0,1],[1,1,1]]` | 1 |
+| 12 | **Horizontal Z-Shape** | 3×2 | 4 | `[[1,1,0],[0,1,1]]` | 1 |
+| 13 | **Vertical Z-Shape** | 2×3 | 4 | `[[0,1],[1,1],[1,0]]` | 1 |
+| 14 | **Horizontal Inverted Z / S-Shape** | 3×2 | 4 | `[[0,1,1],[1,1,0]]` | 1 |
+| 15 | **Vertical Inverted Z / S-Shape** | 2×3 | 4 | `[[1,0],[1,1],[0,1]]` | 1 |
+| 16 | **Cross / Plus Shape** | 3×3 | 5 | `[[0,1,0],[1,1,1],[0,1,0]]` | 1 |
+| 17 | **L-Shape TL** | 3×3 | 5 | `[[1,1,1],[1,0,0],[1,0,0]]` | 1 |
+| 18 | **L-Shape TR** | 3×3 | 5 | `[[1,1,1],[0,0,1],[0,0,1]]` | 1 |
+| 19 | **L-Shape BL** | 3×3 | 5 | `[[1,0,0],[1,0,0],[1,1,1]]` | 1 |
+| 20 | **L-Shape BR** | 3×3 | 5 | `[[0,0,1],[0,0,1],[1,1,1]]` | 1 |
 
 ---
 
 ## 4. Staging Tray & Spawning
-- **Capacity:** Exactly 3 piece slots.
+- **Capacity:** Exactly 3 piece slots. At most 2 pieces of the exact same shape can spawn concurrently in the tray.
 - **Replenishment Rule:** A new set of 3 randomly chosen shapes is generated only after all 3 slots have been emptied by successful placements.
 - **Rebalanced Spawning Weights:**
   - Small shapes (1–4 cells: Dot 1×1, Square 2×2, Line 1×4, Line 4×1): **Weight 1**
   - T-shapes (all 4 orientations: Down, Up, Left, Right): **Weight 1 each** (total weight 4)
   - L-shapes (all 4 orientations): **Weight 1 each** (total weight 4)
-  - Z-Shape: **Weight 2**
+  - Z/S-shapes (all 4 orientations): **Weight 1 each** (total weight 4)
+  - Cross: **Weight 1**
   - Large shapes (Rectangle 2×3, Rectangle 3×2, Square 3×3): **Weight 3**
 - **Color Assignment:** Each piece is assigned a random color from the 6 palette options upon generation (colors may repeat).
 - **Color Assignment:** Each piece is assigned a random color from the 6 palette options upon generation (colors may repeat).

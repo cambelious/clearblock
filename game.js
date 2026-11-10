@@ -22,9 +22,11 @@
     { varName: 'var(--block-6)', rawOklch: 'oklch(0.80 0.14 190)' }  // teal
   ];
 
-  // 16 discrete shape matrices:
-  // Includes all 4 orientations of the T-Shape and all 4 orientations of the L-Shape
-  // Rebalanced weights: small shapes = 1, T-shapes = 1 each (total 4), L-shapes = 1 each (total 4), Z = 2, large rectangles/squares = 3
+  // 20 discrete shape matrices:
+  // Includes all 4 orientations of the T-Shape, all 4 orientations of the L-Shape,
+  // both orientations of Z and Inverted Z (S), plus the Cross, Lines, Squares, and Rectangles
+  // Rebalanced weights: small shapes = 1, T-shapes = 1 each (total 4), L-shapes = 1 each (total 4),
+  // Z/S-shapes = 1 each (total 4), Cross = 1, large rectangles/squares = 3
   const SHAPE_DEFINITIONS = [
     // 1: Dot 1x1 (1 cell - small)
     { name: '1x1', matrix: [[1]], weight: 1 },
@@ -48,15 +50,23 @@
     { name: 'T-Left', matrix: [[0, 1], [1, 1], [0, 1]], weight: 1 },
     // 11: T-Shape Right (4 cells - stem right)
     { name: 'T-Right', matrix: [[1, 0], [1, 1], [1, 0]], weight: 1 },
-    // 12: Horizontal Z-Shape (4 cells - medium)
-    { name: 'Z-Shape', matrix: [[1, 1, 0], [0, 1, 1]], weight: 2 },
-    // 13: L-Shape Top-Left (5 cells)
+    // 12: Horizontal Z-Shape (4 cells)
+    { name: 'Z-Horiz', matrix: [[1, 1, 0], [0, 1, 1]], weight: 1 },
+    // 13: Vertical Z-Shape (4 cells)
+    { name: 'Z-Vert', matrix: [[0, 1], [1, 1], [1, 0]], weight: 1 },
+    // 14: Horizontal Inverted Z / S-Shape (4 cells)
+    { name: 'S-Horiz', matrix: [[0, 1, 1], [1, 1, 0]], weight: 1 },
+    // 15: Vertical Inverted Z / S-Shape (4 cells)
+    { name: 'S-Vert', matrix: [[1, 0], [1, 1], [0, 1]], weight: 1 },
+    // 16: Cross / Plus Shape (5 cells)
+    { name: 'Cross', matrix: [[0, 1, 0], [1, 1, 1], [0, 1, 0]], weight: 1 },
+    // 17: L-Shape Top-Left (5 cells)
     { name: 'L-TL', matrix: [[1, 1, 1], [1, 0, 0], [1, 0, 0]], weight: 1 },
-    // 14: L-Shape Top-Right (5 cells)
+    // 18: L-Shape Top-Right (5 cells)
     { name: 'L-TR', matrix: [[1, 1, 1], [0, 0, 1], [0, 0, 1]], weight: 1 },
-    // 15: L-Shape Bottom-Left (5 cells)
+    // 19: L-Shape Bottom-Left (5 cells)
     { name: 'L-BL', matrix: [[1, 0, 0], [1, 0, 0], [1, 1, 1]], weight: 1 },
-    // 16: L-Shape Bottom-Right (5 cells)
+    // 20: L-Shape Bottom-Right (5 cells)
     { name: 'L-BR', matrix: [[0, 0, 1], [0, 0, 1], [1, 1, 1]], weight: 1 }
   ];
 
@@ -522,21 +532,35 @@
     }
 
     // --- Weighted Tray & Piece Generation ---
-    getRandomWeightedShape() {
-      const totalWeight = SHAPE_DEFINITIONS.reduce((acc, def) => acc + def.weight, 0);
+    getRandomWeightedShape(excludeNames = []) {
+      const pool = SHAPE_DEFINITIONS.filter(def => !excludeNames.includes(def.name));
+      const candidates = (pool.length > 0) ? pool : SHAPE_DEFINITIONS;
+      const totalWeight = candidates.reduce((acc, def) => acc + def.weight, 0);
       let rand = Math.random() * totalWeight;
-      for (const def of SHAPE_DEFINITIONS) {
+      for (const def of candidates) {
         if (rand < def.weight) {
           return def;
         }
         rand -= def.weight;
       }
-      return SHAPE_DEFINITIONS[SHAPE_DEFINITIONS.length - 1];
+      return candidates[candidates.length - 1];
     }
 
     refillTray() {
+      // Clear tray pieces array before refill
+      this.trayPieces = [null, null, null];
+
       for (let i = 0; i < 3; i++) {
-        const shapeDef = this.getRandomWeightedShape();
+        // Enforce maximum of 2 identical shapes in the tray at the same time
+        const counts = {};
+        for (let j = 0; j < i; j++) {
+          const prev = this.trayPieces[j];
+          if (prev && prev.name) {
+            counts[prev.name] = (counts[prev.name] || 0) + 1;
+          }
+        }
+        const exclude = Object.keys(counts).filter(name => counts[name] >= 2);
+        const shapeDef = this.getRandomWeightedShape(exclude);
         const colorDef = BLOCK_COLORS[Math.floor(Math.random() * BLOCK_COLORS.length)];
         this.trayPieces[i] = {
           id: 'piece-' + Date.now() + '-' + i + '-' + Math.random(),

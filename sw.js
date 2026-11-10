@@ -2,7 +2,7 @@
  * Blockfall - Service Worker (Offline PWA)
  */
 
-const CACHE_NAME = 'blockfall-v1.3';
+const CACHE_NAME = 'blockfall-v1.5';
 const STATIC_ASSETS = [
   './',
   './index.html',

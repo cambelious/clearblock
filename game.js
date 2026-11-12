@@ -22,11 +22,11 @@
     { varName: 'var(--block-6)', rawOklch: 'oklch(0.80 0.14 190)' }  // teal
   ];
 
-  // 20 discrete shape matrices:
+  // 21 discrete shape matrices:
   // Includes all 4 orientations of the T-Shape, all 4 orientations of the L-Shape,
-  // both orientations of Z and Inverted Z (S), plus the Cross, Lines, Squares, and Rectangles
+  // both orientations of Z and Inverted Z (S), Lines (1x2, 2x1, 1x4, 4x1), Squares, and Rectangles
   // Rebalanced weights: small shapes = 1, T-shapes = 1 each (total 4), L-shapes = 1 each (total 4),
-  // Z/S-shapes = 1 each (total 4), Cross = 1, large rectangles/squares = 3
+  // Z/S-shapes = 1 each (total 4), large rectangles/squares = 3
   const SHAPE_DEFINITIONS = [
     // 1: Dot 1x1 (1 cell - small)
     { name: '1x1', matrix: [[1]], weight: 1 },
@@ -34,39 +34,41 @@
     { name: '2x2', matrix: [[1, 1], [1, 1]], weight: 1 },
     // 3: Square 3x3 (9 cells - large)
     { name: '3x3', matrix: [[1, 1, 1], [1, 1, 1], [1, 1, 1]], weight: 3 },
-    // 4: Horizontal Line 1x4 (4 cells - small)
+    // 4: Horizontal Line 1x2 (2 cells - small)
+    { name: '1x2', matrix: [[1, 1]], weight: 1 },
+    // 5: Vertical Line 2x1 (2 cells - small)
+    { name: '2x1', matrix: [[1], [1]], weight: 1 },
+    // 6: Horizontal Line 1x4 (4 cells - small)
     { name: '1x4', matrix: [[1, 1, 1, 1]], weight: 1 },
-    // 5: Vertical Line 4x1 (4 cells - small)
+    // 7: Vertical Line 4x1 (4 cells - small)
     { name: '4x1', matrix: [[1], [1], [1], [1]], weight: 1 },
-    // 6: Rectangle 2x3 (6 cells - large)
+    // 8: Rectangle 2x3 (6 cells - large)
     { name: '2x3', matrix: [[1, 1, 1], [1, 1, 1]], weight: 3 },
-    // 7: Rectangle 3x2 (6 cells - large)
+    // 9: Rectangle 3x2 (6 cells - large)
     { name: '3x2', matrix: [[1, 1], [1, 1], [1, 1]], weight: 3 },
-    // 8: T-Shape Down (4 cells - stem down)
+    // 10: T-Shape Down (4 cells - stem down)
     { name: 'T-Down', matrix: [[1, 1, 1], [0, 1, 0]], weight: 1 },
-    // 9: T-Shape Up (4 cells - stem up)
+    // 11: T-Shape Up (4 cells - stem up)
     { name: 'T-Up', matrix: [[0, 1, 0], [1, 1, 1]], weight: 1 },
-    // 10: T-Shape Left (4 cells - stem left)
+    // 12: T-Shape Left (4 cells - stem left)
     { name: 'T-Left', matrix: [[0, 1], [1, 1], [0, 1]], weight: 1 },
-    // 11: T-Shape Right (4 cells - stem right)
+    // 13: T-Shape Right (4 cells - stem right)
     { name: 'T-Right', matrix: [[1, 0], [1, 1], [1, 0]], weight: 1 },
-    // 12: Horizontal Z-Shape (4 cells)
+    // 14: Horizontal Z-Shape (4 cells)
     { name: 'Z-Horiz', matrix: [[1, 1, 0], [0, 1, 1]], weight: 1 },
-    // 13: Vertical Z-Shape (4 cells)
+    // 15: Vertical Z-Shape (4 cells)
     { name: 'Z-Vert', matrix: [[0, 1], [1, 1], [1, 0]], weight: 1 },
-    // 14: Horizontal Inverted Z / S-Shape (4 cells)
+    // 16: Horizontal Inverted Z / S-Shape (4 cells)
     { name: 'S-Horiz', matrix: [[0, 1, 1], [1, 1, 0]], weight: 1 },
-    // 15: Vertical Inverted Z / S-Shape (4 cells)
+    // 17: Vertical Inverted Z / S-Shape (4 cells)
     { name: 'S-Vert', matrix: [[1, 0], [1, 1], [0, 1]], weight: 1 },
-    // 16: Cross / Plus Shape (5 cells)
-    { name: 'Cross', matrix: [[0, 1, 0], [1, 1, 1], [0, 1, 0]], weight: 1 },
-    // 17: L-Shape Top-Left (5 cells)
+    // 18: L-Shape Top-Left (5 cells)
     { name: 'L-TL', matrix: [[1, 1, 1], [1, 0, 0], [1, 0, 0]], weight: 1 },
-    // 18: L-Shape Top-Right (5 cells)
+    // 19: L-Shape Top-Right (5 cells)
     { name: 'L-TR', matrix: [[1, 1, 1], [0, 0, 1], [0, 0, 1]], weight: 1 },
-    // 19: L-Shape Bottom-Left (5 cells)
+    // 20: L-Shape Bottom-Left (5 cells)
     { name: 'L-BL', matrix: [[1, 0, 0], [1, 0, 0], [1, 1, 1]], weight: 1 },
-    // 20: L-Shape Bottom-Right (5 cells)
+    // 21: L-Shape Bottom-Right (5 cells)
     { name: 'L-BR', matrix: [[0, 0, 1], [0, 0, 1], [1, 1, 1]], weight: 1 }
   ];
 

@@ -1,5 +1,5 @@
 {
-  "version": "1.2.1",
-  "timestamp": 1793822900000,
-  "description": "Prevented more than 2 identical shapes in the tray concurrently"
+  "version": "1.3.0",
+  "timestamp": 1793823500000,
+  "description": "Replaced Cross with 1x2 and 2x1 domino pieces"
 }
